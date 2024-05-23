@@ -1,21 +1,39 @@
 #!/usr/bin/env node
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
-import { RhelStack } from '../lib/rhel-stack';
+import * as ec2 from 'aws-cdk-lib/aws-ec2';
+import { SSHStack } from '../lib/ssh-stack';
+import { ICStack } from '../lib/ic-stack';
+import { SSMStack } from '../lib/ssm-stack';
+import { SharedNetworkStack } from '../lib/shared-network';
 
 const app = new cdk.App();
-new RhelStack(app, 'RhelStack', {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const network = new SharedNetworkStack(app, 'SharedNetworkStack');
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+const defaultInstanceProps = {
+	vpc: network.vpc,
+	machineImage: ec2.MachineImage.genericLinux({
+		// amazon/RHEL-9.3.0_HVM-20240117-x86_64-49-Hourly2-GP3
+		"eu-central-1": "ami-0134dde2b68fe1b07",
+	}),
+	instanceType: ec2.InstanceType.of(
+		ec2.InstanceClass.BURSTABLE2,
+		ec2.InstanceSize.MICRO,
+	),
+};
 
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+new SSHStack(app, 'SSHStack', {
+	instanceProps: defaultInstanceProps,
+	vpc: network.vpc,
+});
+
+new ICStack(app, 'ICStack', {
+	instanceProps: defaultInstanceProps,
+	vpc: network.vpc,
+});
+
+
+new SSMStack(app, 'SSMStack', {
+	instanceProps: defaultInstanceProps,
 });

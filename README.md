@@ -1,5 +1,9 @@
-# Welcome to your CDK TypeScript project
+# rhel-on-cloud
 
+Hello there, again it's part of my 'content creator' adventure,
+if you are intrested in wider context please visit [my blog](https://blog.3sky.dev/article/202404-rhel-on-cloud/).
+
+## CDK TypeScript project
 This is a blank project for CDK development with TypeScript.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
